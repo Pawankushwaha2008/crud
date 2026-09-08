@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScholarPulse | Student CRUD & Academic Management</title>
+  <meta name="description" content="A modern, high-performance Student CRUD and Academic Management Dashboard with real-time analytics, filtering, and export capabilities.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- Top Navigation -->
+    <header class="app-header">
+      <div class="header-container">
+        <div class="brand-group">
+          <div class="brand-logo">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+          </div>
+          <div>
+            <div class="brand-title-wrap">
+              <h1 class="brand-title">ScholarPulse</h1>
+              <span class="badge badge-version">v1.0</span>
+            </div>
+            <p class="brand-subtitle">Student Information & Academic Performance System</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <!-- Live API Indicator -->
+          <div class="api-status-chip" id="apiStatusChip" title="Data synchronization status">
+            <span class="status-dot"></span>
+            <span class="status-label" id="apiStatusLabel">Connecting...</span>
+          </div>
+
+          <!-- Reset to sample data -->
+          <button class="btn btn-ghost" id="resetDataBtn" title="Reset to default demo data">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+            <span class="btn-text">Reset Demo</span>
+          </button>
+
+          <!-- Export dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-secondary" id="exportDropdownBtn" aria-expanded="false" aria-haspopup="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              <span>Export</span>
+              <svg class="chevron-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="dropdown-menu" id="exportDropdownMenu">
+              <button class="dropdown-item" id="exportCsvBtn">
+                <span class="ext-tag">CSV</span> Export as SpreadSheet (.csv)
+              </button>
+              <button class="dropdown-item" id="exportJsonBtn">
+                <span class="ext-tag">JSON</span> Export as JSON File (.json)
+              </button>
+            </div>
+          </div>
+
+          <!-- Theme Toggle -->
+          <button class="btn-icon theme-toggle-btn" id="themeToggleBtn" title="Switch Theme (Light/Dark)" aria-label="Toggle dark/light theme">
+            <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"/>
+              <line x1="12" y1="1" x2="12" y2="3"/>
+              <line x1="12" y1="21" x2="12" y2="23"/>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+              <line x1="1" y1="12" x2="3" y2="12"/>
+              <line x1="21" y1="12" x2="23" y2="12"/>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            </svg>
+            <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+          </button>
+
+          <!-- Add Student Primary CTA -->
+          <button class="btn btn-primary" id="openAddModalBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>Add Student</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="main-content">
+      <!-- Analytics KPI Row -->
+      <section class="stats-grid" aria-label="Academic Statistics">
+        <div class="stat-card" id="cardTotalStudents">
+          <div class="stat-icon-wrap icon-indigo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="stat-details">
+            <span class="stat-label">Total Enrolled</span>
+            <div class="stat-value-group">
+              <span class="stat-value" id="statTotalStudents">0</span>
+              <span class="stat-trend trend-positive" id="statActiveRatio">100% active</span>
+            </div>
+            <span class="stat-subtext" id="statEnrolledDetail">Loading records...</span>
+          </div>
+        </div>
+
+        <div class="stat-card" id="cardAvgGpa">
+          <div class="stat-icon-wrap icon-emerald">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="8" r="7"/>
+              <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+            </svg>
+          </div>
+          <div class="stat-details">
+            <span class="stat-label">Average Cumulative GPA</span>
+            <div class="stat-value-group">
+              <span class="stat-value" id="statAvgGpa">0.00</span>
+              <span class="badge badge-gpa" id="statGpaGrade">--</span>
+            </div>
+            <span class="stat-subtext">Out of 4.00 Grade Scale</span>
+          </div>
+        </div>
+
+        <div class="stat-card" id="cardAttendance">
+          <div class="stat-icon-wrap icon-cyan">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <div class="stat-details">
+            <span class="stat-label">Overall Attendance</span>
+            <div class="stat-value-group">
+              <span class="stat-value" id="statAvgAttendance">0%</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar" id="statAttendanceBar" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card" id="cardHonorRoll">
+          <div class="stat-icon-wrap icon-amber">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
+          <div class="stat-details">
+            <span class="stat-label">Dean's Honor Roll</span>
+            <div class="stat-value-group">
+              <span class="stat-value" id="statHonorRollCount">0</span>
+              <span class="stat-pill-gold">GPA ≥ 3.8</span>
+            </div>
+            <span class="stat-subtext" id="statHonorRollSubtext">Excellence recognition</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Search, Filters, & Toolbar -->
+      <section class="toolbar-section">
+        <div class="search-box-wrap">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search by student name, ID, email, or department..." autocomplete="off">
+          <button class="clear-search-btn hidden" id="clearSearchBtn" title="Clear search" aria-label="Clear search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="filters-row">
+          <!-- Department Filter -->
+          <div class="filter-item">
+            <label for="deptFilter" class="sr-only">Department</label>
+            <select id="deptFilter" class="filter-select">
+              <option value="ALL">All Departments</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Data Science">Data Science</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="Electrical Engineering">Electrical Engineering</option>
+              <option value="Business Administration">Business Administration</option>
+              <option value="Biotechnology">Biotechnology</option>
+              <option value="Graphic Design & UI">Graphic Design & UI</option>
+            </select>
+          </div>
+
+          <!-- Academic Year Filter -->
+          <div class="filter-item">
+            <label for="yearFilter" class="sr-only">Year</label>
+            <select id="yearFilter" class="filter-select">
+              <option value="ALL">All Academic Years</option>
+              <option value="Freshman (1st Year)">Freshman (1st Year)</option>
+              <option value="Sophomore (2nd Year)">Sophomore (2nd Year)</option>
+              <option value="Junior (3rd Year)">Junior (3rd Year)</option>
+              <option value="Senior (4th Year)">Senior (4th Year)</option>
+            </select>
+          </div>
+
+          <!-- Status Filter Pills -->
+          <div class="status-pills" role="radiogroup" aria-label="Status Filter">
+            <button class="status-pill active" data-status="ALL">All</button>
+            <button class="status-pill" data-status="Active">Active</button>
+            <button class="status-pill" data-status="On Leave">On Leave</button>
+            <button class="status-pill" data-status="Inactive">Inactive</button>
+          </div>
+
+          <!-- View Switcher -->
+          <div class="view-switcher" role="group" aria-label="View Switcher">
+            <button class="view-btn active" id="tableViewBtn" title="Data Table View" aria-label="Table view">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+            <button class="view-btn" id="cardViewBtn" title="Profile Cards Grid View" aria-label="Card view">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bulk Actions Floating Bar (appears when items are checked) -->
+      <div class="bulk-action-bar hidden" id="bulkActionBar">
+        <div class="bulk-info">
+          <span class="selected-badge" id="selectedCount">0</span>
+          <span>students selected</span>
+        </div>
+        <div class="bulk-buttons">
+          <button class="btn btn-danger-soft btn-sm" id="bulkDeleteBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            Delete Selected
+          </button>
+          <button class="btn btn-ghost btn-sm" id="deselectAllBtn">Deselect</button>
+        </div>
+      </div>
+
+      <!-- Main Data Display Container -->
+      <section class="data-container">
+        <!-- Table View -->
+        <div class="table-card" id="tableViewSection">
+          <div class="table-responsive">
+            <table class="students-table" id="studentsTable">
+              <thead>
+                <tr>
+                  <th class="th-checkbox">
+                    <input type="checkbox" id="selectAllCheckbox" aria-label="Select all students">
+                  </th>
+                  <th class="th-sortable" data-sort="studentId">
+                    <div class="th-content">Student ID <span class="sort-indicator"></span></div>
+                  </th>
+                  <th class="th-sortable" data-sort="fullName">
+                    <div class="th-content">Student Profile <span class="sort-indicator"></span></div>
+                  </th>
+                  <th class="th-sortable" data-sort="department">
+                    <div class="th-content">Department & Year <span class="sort-indicator"></span></div>
+                  </th>
+                  <th class="th-sortable" data-sort="gpa">
+                    <div class="th-content">GPA <span class="sort-indicator"></span></div>
+                  </th>
+                  <th class="th-sortable" data-sort="attendance">
+                    <div class="th-content">Attendance <span class="sort-indicator"></span></div>
+                  </th>
+                  <th class="th-sortable" data-sort="status">
+                    <div class="th-content">Status <span class="sort-indicator"></span></div>
+                  </th>
+                  <th class="th-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentsTableBody">
+                <!-- Dynamically injected via app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Cards View (Hidden by default, shown when cardViewBtn is clicked) -->
+        <div class="cards-grid hidden" id="cardViewSection">
+          <!-- Dynamically injected via app.js -->
+        </div>
+
+        <!-- Empty State Message -->
+        <div class="empty-state hidden" id="emptyState">
+          <div class="empty-state-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+          </div>
+          <h3>No students match your query</h3>
+          <p>Try adjusting your search criteria, clear applied filters, or register a new student.</p>
+          <button class="btn btn-secondary mt-3" id="clearAllFiltersBtn">Reset All Filters</button>
+        </div>
+
+        <!-- Table Footer / Pagination -->
+        <footer class="table-footer">
+          <div class="footer-info">
+            <span id="paginationInfo">Showing 1 to 8 of 8 records</span>
+            <div class="page-size-selector">
+              <label for="pageSizeSelect">Show:</label>
+              <select id="pageSizeSelect" class="compact-select">
+                <option value="6">6</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pagination-controls" id="paginationControls">
+            <button class="page-btn" id="prevPageBtn" aria-label="Previous page">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+            <div class="page-numbers" id="pageNumbers"></div>
+            <button class="page-btn" id="nextPageBtn" aria-label="Next page">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal 1: Add / Edit Student Modal -->
+  <div class="modal-backdrop" id="studentModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="modalTitle">Register New Student</h2>
+          <p class="modal-subtitle" id="modalSubtitle">Fill in student details below. Required fields are marked *</p>
+        </div>
+        <button class="btn-close" id="closeStudentModalBtn" aria-label="Close dialog">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <form id="studentForm" class="modal-form" novalidate>
+        <input type="hidden" id="studentInternalId" value="">
+
+        <!-- Color theme picker avatar row -->
+        <div class="form-avatar-picker">
+          <div class="avatar-preview" id="avatarPreview">JD</div>
+          <div class="avatar-colors">
+            <label class="form-label">Profile Accent Color</label>
+            <div class="color-palette" id="colorPalette">
+              <button type="button" class="color-swatch active" data-color="#6366f1" style="background: #6366f1;"></button>
+              <button type="button" class="color-swatch" data-color="#06b6d4" style="background: #06b6d4;"></button>
+              <button type="button" class="color-swatch" data-color="#10b981" style="background: #10b981;"></button>
+              <button type="button" class="color-swatch" data-color="#ec4899" style="background: #ec4899;"></button>
+              <button type="button" class="color-swatch" data-color="#f59e0b" style="background: #f59e0b;"></button>
+              <button type="button" class="color-swatch" data-color="#8b5cf6" style="background: #8b5cf6;"></button>
+              <button type="button" class="color-swatch" data-color="#3b82f6" style="background: #3b82f6;"></button>
+            </div>
+            <input type="hidden" id="avatarColorInput" value="#6366f1">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <!-- Full Name -->
+          <div class="form-group span-2">
+            <label for="fullNameInput" class="form-label">Full Name <span class="required">*</span></label>
+            <input type="text" id="fullNameInput" class="form-input" placeholder="e.g. John Doe" required>
+            <span class="field-error" id="fullNameError"></span>
+          </div>
+
+          <!-- Student ID / Roll No -->
+          <div class="form-group">
+            <label for="studentIdInput" class="form-label">Student ID / Roll No <span class="required">*</span></label>
+            <input type="text" id="studentIdInput" class="form-input font-mono" placeholder="STU-2026-009" required>
+            <span class="field-error" id="studentIdError"></span>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label for="emailInput" class="form-label">Institutional Email <span class="required">*</span></label>
+            <input type="email" id="emailInput" class="form-input" placeholder="student@university.edu" required>
+            <span class="field-error" id="emailError"></span>
+          </div>
+
+          <!-- Phone -->
+          <div class="form-group">
+            <label for="phoneInput" class="form-label">Contact Phone</label>
+            <input type="tel" id="phoneInput" class="form-input" placeholder="+1 (555) 000-0000">
+            <span class="field-error" id="phoneError"></span>
+          </div>
+
+          <!-- Department -->
+          <div class="form-group">
+            <label for="departmentInput" class="form-label">Department / Major <span class="required">*</span></label>
+            <select id="departmentInput" class="form-select" required>
+              <option value="">Select Major...</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Data Science">Data Science</option>
+              <option value="Mechanical Engineering">Mechanical Engineering</option>
+              <option value="Electrical Engineering">Electrical Engineering</option>
+              <option value="Business Administration">Business Administration</option>
+              <option value="Biotechnology">Biotechnology</option>
+              <option value="Graphic Design & UI">Graphic Design & UI</option>
+            </select>
+            <span class="field-error" id="departmentError"></span>
+          </div>
+
+          <!-- Academic Year -->
+          <div class="form-group">
+            <label for="yearInput" class="form-label">Academic Year <span class="required">*</span></label>
+            <select id="yearInput" class="form-select" required>
+              <option value="Freshman (1st Year)">Freshman (1st Year)</option>
+              <option value="Sophomore (2nd Year)">Sophomore (2nd Year)</option>
+              <option value="Junior (3rd Year)">Junior (3rd Year)</option>
+              <option value="Senior (4th Year)">Senior (4th Year)</option>
+            </select>
+          </div>
+
+          <!-- Status -->
+          <div class="form-group">
+            <label for="statusInput" class="form-label">Enrollment Status <span class="required">*</span></label>
+            <select id="statusInput" class="form-select" required>
+              <option value="Active">Active</option>
+              <option value="On Leave">On Leave</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          <!-- GPA -->
+          <div class="form-group">
+            <label for="gpaInput" class="form-label">Cumulative GPA (0.0 - 4.0) <span class="required">*</span></label>
+            <div class="input-prefix-wrap">
+              <input type="number" id="gpaInput" class="form-input" step="0.01" min="0" max="4.00" placeholder="3.75" required>
+            </div>
+            <span class="field-error" id="gpaError"></span>
+          </div>
+
+          <!-- Attendance % -->
+          <div class="form-group">
+            <label for="attendanceInput" class="form-label">Attendance Rate (%) <span class="required">*</span></label>
+            <div class="input-suffix-wrap">
+              <input type="number" id="attendanceInput" class="form-input" min="0" max="100" placeholder="95" required>
+              <span class="input-suffix">%</span>
+            </div>
+            <span class="field-error" id="attendanceError"></span>
+          </div>
+
+          <!-- Notes / Achievements -->
+          <div class="form-group span-2">
+            <label for="notesInput" class="form-label">Academic Notes & Activities</label>
+            <textarea id="notesInput" class="form-textarea" rows="2" placeholder="e.g. Dean's honor roll, lab researcher, robotics club lead..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelStudentModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveStudentBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span id="saveBtnText">Save Student</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Student Dossier / View Details Modal -->
+  <div class="modal-backdrop" id="viewModal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+    <div class="modal-card modal-card-wide">
+      <div class="modal-header dossier-header">
+        <div class="dossier-profile-summary">
+          <div class="dossier-avatar" id="viewAvatar">SM</div>
+          <div>
+            <div class="dossier-name-row">
+              <h2 class="modal-title" id="viewFullName">Sophia Montgomery</h2>
+              <span class="status-badge" id="viewStatusBadge">Active</span>
+            </div>
+            <p class="font-mono text-muted" id="viewStudentId">STU-2026-001</p>
+          </div>
+        </div>
+        <button class="btn-close" id="closeViewModalBtn" aria-label="Close dialog">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="dossier-body">
+        <!-- Academic Summary Metrics Cards -->
+        <div class="dossier-metrics-grid">
+          <div class="metric-box">
+            <span class="metric-label">GPA Scale</span>
+            <div class="metric-value-row">
+              <span class="metric-val text-primary" id="viewGpa">3.92</span>
+              <span class="badge badge-gpa" id="viewGpaBadge">Honors</span>
+            </div>
+          </div>
+
+          <div class="metric-box">
+            <span class="metric-label">Attendance Record</span>
+            <div class="metric-value-row">
+              <span class="metric-val text-success" id="viewAttendance">98%</span>
+            </div>
+          </div>
+
+          <div class="metric-box">
+            <span class="metric-label">Department</span>
+            <div class="metric-text-val" id="viewDepartment">Computer Science</div>
+          </div>
+
+          <div class="metric-box">
+            <span class="metric-label">Standing</span>
+            <div class="metric-text-val" id="viewYear">Senior (4th Year)</div>
+          </div>
+        </div>
+
+        <!-- Contact & Administrative Details -->
+        <div class="dossier-details-section">
+          <h4 class="section-subtitle">Contact & Records</h4>
+          <div class="dossier-info-list">
+            <div class="info-row">
+              <span class="info-title">Institutional Email:</span>
+              <span class="info-val font-mono" id="viewEmail">sophia@university.edu</span>
+            </div>
+            <div class="info-row">
+              <span class="info-title">Phone Number:</span>
+              <span class="info-val" id="viewPhone">+1 (555) 234-5678</span>
+            </div>
+            <div class="info-row">
+              <span class="info-title">Date Registered:</span>
+              <span class="info-val" id="viewCreatedAt">Aug 15, 2024</span>
+            </div>
+            <div class="info-row">
+              <span class="info-title">Notes / Highlights:</span>
+              <span class="info-val info-notes" id="viewNotes">Dean's Honor List, Lead AI Research Assistant.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="closeViewBtnSecondary">Close</button>
+        <button type="button" class="btn btn-primary" id="viewEditStudentBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+          Edit Record
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Confirm Delete Modal -->
+  <div class="modal-backdrop" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal-card modal-card-sm">
+      <div class="delete-icon-banner">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="delete-content text-center">
+        <h3 class="modal-title" id="deleteModalTitle">Confirm Deletion</h3>
+        <p class="modal-subtitle mt-2" id="deleteModalMessage">
+          Are you sure you want to delete this student record? This action is permanent and cannot be undone.
+        </p>
+        <div class="student-delete-preview" id="deletePreviewBox">
+          <strong id="deleteTargetName">Student Name</strong>
+          <span class="font-mono text-muted" id="deleteTargetId">STU-000</span>
+        </div>
+      </div>
+      <div class="modal-footer justify-center">
+        <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          Permanently Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

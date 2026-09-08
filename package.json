@@ -1,0 +1,12 @@
+{
+  "name": "student-crud-system",
+  "version": "1.0.0",
+  "description": "Premium Student Management & CRUD Web Application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["student", "crud", "management", "dashboard"],
+  "author": "",
+  "license": "MIT"
+}
