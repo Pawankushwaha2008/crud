@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/students/:id*",
+      "destination": "/api/students"
+    },
+    {
+      "source": "/api/students",
+      "destination": "/api/students"
+    }
+  ]
+}

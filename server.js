@@ -301,7 +301,7 @@ const server = http.createServer(async (req, res) => {
 
   // --- STATIC FILE SERVING ---
   let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
-  
+
   // Security check: ensure path stays within __dirname
   if (!filePath.startsWith(__dirname)) {
     res.writeHead(403);
@@ -331,9 +331,13 @@ const server = http.createServer(async (req, res) => {
 // Initialize storage file if not present
 loadStudents();
 
-server.listen(PORT, () => {
-  console.log(`===================================================`);
-  console.log(`🎓 ScholarPulse - Student CRUD System is running!`);
-  console.log(`🚀 Web Interface & REST API: http://localhost:${PORT}`);
-  console.log(`===================================================`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`===================================================`);
+    console.log(`🎓 ScholarPulse - Student CRUD System is running!`);
+    console.log(`🚀 Web Interface & REST API: http://localhost:${PORT}`);
+    console.log(`===================================================`);
+  });
+}
+
+module.exports = server;
